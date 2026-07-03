@@ -82,7 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    updateThemeToggle(false);
+    const prefersDarkMode =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(prefersDarkMode ? "dark" : "light", false);
   }
 
   // Initialize filters from active elements
