@@ -498,6 +498,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const activityUrl = `${window.location.origin}${
+      window.location.pathname
+    }?activity=${encodeURIComponent(name)}`;
+    const shareText = `Check out the ${name} activity at Mergington High School!`;
+    const encodedShareText = encodeURIComponent(shareText);
+    const encodedActivityUrl = encodeURIComponent(activityUrl);
+    const encodedEmailSubject = encodeURIComponent(
+      `Join me for ${name} at Mergington High School`
+    );
+    const encodedEmailBody = encodeURIComponent(`${shareText} ${activityUrl}`);
 
     // Create activity tag
     const tagHtml = `
@@ -552,6 +562,36 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-actions">
+        <h5>Share this activity:</h5>
+        <div class="share-buttons">
+          <a
+            class="share-button"
+            href="https://wa.me/?text=${encodedShareText}%20${encodedActivityUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp
+          </a>
+          <a
+            class="share-button"
+            href="https://twitter.com/intent/tweet?text=${encodedShareText}&url=${encodedActivityUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            X
+          </a>
+          <a
+            class="share-button"
+            href="mailto:?subject=${encodedEmailSubject}&body=${encodedEmailBody}"
+          >
+            Email
+          </a>
+          <button class="share-button copy-share-link" data-url="${activityUrl}">
+            Copy Link
+          </button>
+        </div>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -575,6 +615,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    // Add click handler for copy link button
+    const copyLinkButton = activityCard.querySelector(".copy-share-link");
+    copyLinkButton.addEventListener("click", async () => {
+      const linkToCopy = copyLinkButton.dataset.url;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(linkToCopy);
+          showMessage("Activity link copied. Share it with friends!", "success");
+        } else {
+          throw new Error("Clipboard API unavailable");
+        }
+      } catch (error) {
+        showMessage(
+          "Copy failed. Please copy the page URL from your browser.",
+          "error"
+        );
+        console.error("Error copying activity link:", error);
+      }
     });
 
     // Add click handler for register button (only when authenticated)
