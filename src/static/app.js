@@ -498,10 +498,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
-    const activityUrl = `${window.location.origin}${
-      window.location.pathname
-    }?activity=${encodeURIComponent(name)}`;
+    const activityUrlObject = new URL(window.location.href);
+    activityUrlObject.searchParams.set("activity", name);
+    const activityUrl = activityUrlObject.toString();
     const shareText = `Check out the ${name} activity at Mergington High School!`;
+    const encodedWhatsAppText = encodeURIComponent(`${shareText} ${activityUrl}`);
     const encodedShareText = encodeURIComponent(shareText);
     const encodedActivityUrl = encodeURIComponent(activityUrl);
     const encodedEmailSubject = encodeURIComponent(
@@ -567,7 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="share-buttons">
           <a
             class="share-button"
-            href="https://wa.me/?text=${encodedShareText}%20${encodedActivityUrl}"
+            href="https://wa.me/?text=${encodedWhatsAppText}"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -575,7 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </a>
           <a
             class="share-button"
-            href="https://twitter.com/intent/tweet?text=${encodedShareText}&url=${encodedActivityUrl}"
+            href="https://x.com/intent/tweet?text=${encodedShareText}&url=${encodedActivityUrl}"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -619,24 +620,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add click handler for copy link button
     const copyLinkButton = activityCard.querySelector(".copy-share-link");
-    copyLinkButton.addEventListener("click", async () => {
-      const linkToCopy = copyLinkButton.dataset.url;
+    if (copyLinkButton) {
+      copyLinkButton.addEventListener("click", async () => {
+        const linkToCopy = copyLinkButton.dataset.url;
 
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(linkToCopy);
-          showMessage("Activity link copied. Share it with friends!", "success");
-        } else {
-          throw new Error("Clipboard API unavailable");
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(linkToCopy);
+            showMessage(
+              "Activity link copied. Share it with friends!",
+              "success"
+            );
+          } else {
+            throw new Error("Clipboard API unavailable");
+          }
+        } catch (error) {
+          showMessage(
+            "Copy failed. Please copy the page URL from your browser.",
+            "error"
+          );
+          console.error("Error copying activity link:", error);
         }
-      } catch (error) {
-        showMessage(
-          "Copy failed. Please copy the page URL from your browser.",
-          "error"
-        );
-        console.error("Error copying activity link:", error);
-      }
-    });
+      });
+    }
 
     // Add click handler for register button (only when authenticated)
     if (currentUser) {
